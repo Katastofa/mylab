@@ -1,0 +1,14 @@
+# Всё, что генерирует SKiDL, — пересобирается из .py
+build/
+*.erc
+*.log
+*_sklib.py
+__pycache__/
+.venv/
+
+# Временные файлы KiCad
+*-backups/
+*.kicad_prl
+*.lck
+fp-info-cache
+\#auto_saved_files#

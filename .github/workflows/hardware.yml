@@ -1,0 +1,41 @@
+name: hardware
+
+on:
+  push:
+    paths: ["hardware/**", ".github/workflows/hardware.yml"]
+  pull_request:
+    paths: ["hardware/**", ".github/workflows/hardware.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: kicad/kicad:9.0
+      options: --user root
+    defaults:
+      run:
+        working-directory: hardware
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          apt-get update -q
+          apt-get install -y -q --no-install-recommends python3-venv python3-pip make zip
+          python3 -m venv /opt/venv
+          /opt/venv/bin/pip install -q -r requirements.txt
+
+      - name: ERC + netlist + schematic
+        run: make PYTHON=/opt/venv/bin/python
+
+      - name: DRC + fabrication files
+        run: make PYTHON=/opt/venv/bin/python fab
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hardware-build
+          path: |
+            hardware/boards/*/build/
+            hardware/boards/*/*.erc
